@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+
+# Dataset images (large, generated — run generate.py to recreate)
+dataset/images/
+
+# Trained model weights
+*.pth
+*.pt
+*.ckpt
+
+# OS
+.DS_Store
+
+# Plans (internal, not for repo)
+plans/
+
+# Editor
+.vscode/
+.idea/
