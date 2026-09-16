@@ -24,6 +24,7 @@ OUT_DIR.mkdir(exist_ok=True)
 CORRECT_USERS = ["admin", "rahul", "user"]
 WRONG_USERS = ["guest", "hacker", "test", "foo", "root"]
 PASSWORD = "1234"  # always the same for simplicity
+WRONG_PASSWORDS = ["", "12", "123", "password", "0000"]
 
 # Submit button region — center is where click will land
 SUBMIT_X1, SUBMIT_Y1 = 140, 195
@@ -32,7 +33,7 @@ SUBMIT_CX = (SUBMIT_X1 + SUBMIT_X2) // 2
 SUBMIT_CY = (SUBMIT_Y1 + SUBMIT_Y2) // 2
 
 
-def draw_login(username: str, noise: float = 0.0) -> Image.Image:
+def draw_login(username: str, password: str = PASSWORD, noise: float = 0.0) -> Image.Image:
     img = Image.new("RGB", (W, H), color=(245, 245, 245))
     d = ImageDraw.Draw(img)
 
@@ -56,7 +57,7 @@ def draw_login(username: str, noise: float = 0.0) -> Image.Image:
     d.rounded_rectangle(
         [50, 170, 350, 200], radius=4, fill=(255, 255, 255), outline=(180, 180, 180), width=1
     )
-    d.text((60, 178), "•" * len(PASSWORD), fill=(20, 20, 20))
+    d.text((60, 178), "•" * len(password), fill=(20, 20, 20))
 
     # Submit button
     d.rounded_rectangle([SUBMIT_X1, SUBMIT_Y1, SUBMIT_X2, SUBMIT_Y2], radius=4, fill=(59, 130, 246))
@@ -107,11 +108,17 @@ def draw_error() -> Image.Image:
     return img
 
 
-def generate(n_per_class: int = 300):
+def generate(n_per_class: int = 300) -> None:
     pairs = []
     idx = 0
 
-    def save_pair(input_img, output_img, label, username):
+    def save_pair(
+        input_img: Image.Image,
+        output_img: Image.Image,
+        label: str,
+        username: str,
+        password: str,
+    ) -> None:
         nonlocal idx
         in_path = OUT_DIR / f"{idx:04d}_input.png"
         out_path = OUT_DIR / f"{idx:04d}_output.png"
@@ -125,6 +132,7 @@ def generate(n_per_class: int = 300):
                 "click_y": SUBMIT_CY,
                 "label": label,  # "welcome" or "error"
                 "username": username,
+                "password": password,
             }
         )
         idx += 1
@@ -133,13 +141,15 @@ def generate(n_per_class: int = 300):
     for _ in range(n_per_class):
         user = random.choice(CORRECT_USERS)
         noise = random.uniform(0, 0.03)  # tiny noise for augmentation
-        save_pair(draw_login(user, noise), draw_welcome(user), "welcome", user)
+        save_pair(draw_login(user, PASSWORD, noise), draw_welcome(user), "welcome", user, PASSWORD)
 
     # Wrong credentials → error screen
     for _ in range(n_per_class):
-        user = random.choice(WRONG_USERS)
+        valid_username = random.random() < 0.35
+        user = random.choice(CORRECT_USERS if valid_username else WRONG_USERS)
+        password = random.choice(WRONG_PASSWORDS) if valid_username else PASSWORD
         noise = random.uniform(0, 0.03)
-        save_pair(draw_login(user, noise), draw_error(), "error", user)
+        save_pair(draw_login(user, password, noise), draw_error(), "error", user, password)
 
     pairs_file = Path(__file__).parent / "pairs.json"
     pairs_file.write_text(json.dumps(pairs, indent=2))

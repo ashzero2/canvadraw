@@ -12,6 +12,10 @@ dataset/images/
 *.pt
 *.ckpt
 
+# Generated reports
+prediction*.png
+test_results.png
+
 # OS
 .DS_Store
 

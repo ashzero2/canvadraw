@@ -1,3 +1,17 @@
+[project]
+name = "canvadraw"
+version = "0.1.0"
+description = "Predict the next canvas UI frame from a screenshot and click position"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.141,<1",
+    "numpy>=2.5,<3",
+    "pillow>=12.3,<13",
+    "torch>=2.14,<3",
+    "torchvision>=0.29,<1",
+    "uvicorn[standard]>=0.52,<1",
+]
+
 [tool.ruff]
 line-length = 100
 target-version = "py312"
